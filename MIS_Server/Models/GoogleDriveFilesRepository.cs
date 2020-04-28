@@ -24,7 +24,6 @@ namespace MIS_Server.Models
             var CSPath = System.Web.Hosting.HostingEnvironment.MapPath("~/Content/");
             using (var stream = new FileStream(Path.Combine(CSPath, "client_secret.json"), FileMode.Open, FileAccess.Read))
             {
-                String FolderPath = @"D:\";
                 String FilePath = Path.Combine(CSPath, "DriveServiceCredentials.json");
 
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
