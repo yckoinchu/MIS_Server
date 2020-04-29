@@ -13,51 +13,52 @@ namespace MIS_Server.Models
 {
     public class GoogleDriveFilesRepository
     {
-        //defined scope.
-        public static string[] Scopes = { DriveService.Scope.Drive };
+        
+        //defined scope. 變數的命名第一個字元要小寫
+        public static string[] scopes = { DriveService.Scope.Drive }; // application 短期存取(scope) 使用者的資料
 
         //create Drive API service.
-        public static DriveService GetService()
+        public static DriveService getService()     // 函數的命名第一個字元要小寫
         {
             //get Credentials from client_secret.json file 
             UserCredential credential;
-            var CSPath = System.Web.Hosting.HostingEnvironment.MapPath("~/Content/");
-            using (var stream = new FileStream(Path.Combine(CSPath, "client_secret.json"), FileMode.Open, FileAccess.Read))
+            var secretPath = System.Web.Hosting.HostingEnvironment.MapPath("~/Content/");   // path of id and key 
+            using (var streamDevice = new FileStream(Path.Combine(secretPath, "client_secret.json"), FileMode.Open, FileAccess.Read)) // 讀取檔案的串流設備
             {
-                String FilePath = Path.Combine(CSPath, "DriveServiceCredentials.json");
+                String credentialPath = Path.Combine(secretPath, "DriveServiceCredentials.json"); // 憑證的路徑
 
-                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.Load(stream).Secrets,
-                    Scopes,
+                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(  // 製作憑證
+                    GoogleClientSecrets.Load(streamDevice).Secrets,
+                    scopes,
                     "user",
                     CancellationToken.None,
-                    new FileDataStore(FilePath, true)).Result;
+                    new FileDataStore(credentialPath, true)).Result;
             }
 
             //create Drive API service.
-            DriveService service = new DriveService(new BaseClientService.Initializer()
+            DriveService driveService = new DriveService(new BaseClientService.Initializer()  // 提供雲端硬碟服務的物件(做設定)
             {
                 HttpClientInitializer = credential,
                 ApplicationName = "GoogleDriveRestAPI-v3",
             });
-            return service;
+            return driveService;
         }
 
         //get all files from Google Drive.
-        public static List<GoogleDriveFiles> GetDriveFiles()
+        public static List<GoogleDriveFiles> getAllDriveFiles()
         {
-            DriveService service = GetService();
+            DriveService driveService = getService();
 
             // define parameters of request.
-            FilesResource.ListRequest FileListRequest = service.Files.List();
+            FilesResource.ListRequest fileListRequest = driveService.Files.List();
 
             //listRequest.PageSize = 10;
             //listRequest.PageToken = 10;
-            FileListRequest.Fields = "nextPageToken, files(id, name, size, version, createdTime)";
+            fileListRequest.Fields = "nextPageToken, files(id, name, size, version, createdTime)";
 
             //get file list.
-            IList<Google.Apis.Drive.v3.Data.File> files = FileListRequest.Execute().Files;
-            List<GoogleDriveFiles> FileList = new List<GoogleDriveFiles>();
+            IList<Google.Apis.Drive.v3.Data.File> files = fileListRequest.Execute().Files;
+            List<GoogleDriveFiles> fileList = new List<GoogleDriveFiles>();
 
             if (files != null && files.Count > 0)
             {
@@ -71,10 +72,10 @@ namespace MIS_Server.Models
                         Version = file.Version,
                         CreatedTime = file.CreatedTime
                     };
-                    FileList.Add(File);
+                    fileList.Add(File);
                 }
             }
-            return FileList;
+            return fileList;
         }
 
         //file Upload to the Google Drive.
@@ -82,21 +83,21 @@ namespace MIS_Server.Models
         {
             if (file != null && file.ContentLength > 0)
             {
-                DriveService service = GetService();
+                DriveService driveService = getService();
 
-                string path = Path.Combine(HttpContext.Current.Server.MapPath("~/GoogleDriveFiles"),
+                string pathForDownloadRepositories = Path.Combine(HttpContext.Current.Server.MapPath("~/GoogleDriveFiles"),
                 Path.GetFileName(file.FileName));
-                file.SaveAs(path);
+                file.SaveAs(pathForDownloadRepositories);
 
                 var FileMetaData = new Google.Apis.Drive.v3.Data.File();
                 FileMetaData.Name = Path.GetFileName(file.FileName);
-                FileMetaData.MimeType = MimeMapping.GetMimeMapping(path);
+                FileMetaData.MimeType = MimeMapping.GetMimeMapping(pathForDownloadRepositories);
 
-                FilesResource.CreateMediaUpload request;
+                FilesResource.CreateMediaUpload request;  // requeset 是原創作者的命名,真實的用途是「上傳的媒介」 
 
-                using (var stream = new System.IO.FileStream(path, System.IO.FileMode.Open))
+                using (var streamDevice = new System.IO.FileStream(pathForDownloadRepositories, System.IO.FileMode.Open))
                 {
-                    request = service.Files.Create(FileMetaData, stream, FileMetaData.MimeType);
+                    request = driveService.Files.Create(FileMetaData, streamDevice, FileMetaData.MimeType);
                     request.Fields = "id";
                     request.Upload();
                 }
@@ -106,13 +107,13 @@ namespace MIS_Server.Models
         //Download file from Google Drive by fileId.
         public static string DownloadGoogleFile(string fileId)
         {
-            DriveService service = GetService();
+            DriveService driveService = getService();
 
             string FolderPath = System.Web.HttpContext.Current.Server.MapPath("/GoogleDriveFiles/");
-            FilesResource.GetRequest request = service.Files.Get(fileId);
+            FilesResource.GetRequest request = driveService.Files.Get(fileId);
 
             string FileName = request.Execute().Name;
-            string FilePath = System.IO.Path.Combine(FolderPath, FileName);
+            string credentialPath = System.IO.Path.Combine(FolderPath, FileName);
 
             MemoryStream stream1 = new MemoryStream();
 
@@ -131,7 +132,7 @@ namespace MIS_Server.Models
                     case DownloadStatus.Completed:
                         {
                             Console.WriteLine("Download complete.");
-                            SaveStream(stream1, FilePath);
+                            SaveStream(stream1, credentialPath);
                             break;
                         }
                     case DownloadStatus.Failed:
@@ -142,13 +143,13 @@ namespace MIS_Server.Models
                 }
             };
             request.Download(stream1);
-            return FilePath;
+            return credentialPath;
         }
 
         // file save to server path
-        private static void SaveStream(MemoryStream stream, string FilePath)
+        private static void SaveStream(MemoryStream stream, string credentialPath)
         {
-            using (System.IO.FileStream file = new FileStream(FilePath, FileMode.Create, FileAccess.ReadWrite))
+            using (System.IO.FileStream file = new FileStream(credentialPath, FileMode.Create, FileAccess.ReadWrite))
             {
                 stream.WriteTo(file);
             }
@@ -157,18 +158,18 @@ namespace MIS_Server.Models
         //Delete file from the Google drive
         public static void DeleteFile(GoogleDriveFiles files)
         {
-            DriveService service = GetService();
+            DriveService driveService = getService();
             try
             {
                 // Initial validation.
-                if (service == null)
-                    throw new ArgumentNullException("service");
+                if (driveService == null)
+                    throw new ArgumentNullException("driveService");
 
                 if (files == null)
                     throw new ArgumentNullException(files.Id);
 
                 // Make the request.
-                service.Files.Delete(files.Id).Execute();
+                driveService.Files.Delete(files.Id).Execute();
             }
             catch (Exception ex)
             {

@@ -13,7 +13,7 @@ namespace MIS_Server.Controllers
         [HttpGet]
         public ActionResult GetGoogleDriveFiles()
         {
-            return View(GoogleDriveFilesRepository.GetDriveFiles());
+            return View(GoogleDriveFilesRepository.getAllDriveFiles());
         }
 
         [HttpPost]
@@ -27,7 +27,7 @@ namespace MIS_Server.Controllers
         public ActionResult UploadFile(HttpPostedFileBase file)
         {
             GoogleDriveFilesRepository.FileUpload(file);
-            return RedirectToAction("GetGoogleDriveFiles");
+            return RedirectToAction("GetGoogleDriveFiles"); // GetGoogleDriveFiles
         }
 
         public void DownloadFile(string id)
