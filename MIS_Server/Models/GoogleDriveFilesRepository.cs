@@ -18,7 +18,7 @@ namespace MIS_Server.Models
         public static string[] scopes = { DriveService.Scope.Drive }; // application 短期存取(scope) 使用者的資料
 
         //create Drive API service.
-        public static DriveService getService()     // 函數的命名第一個字元要小寫
+        public static DriveService getDriveService()     // 函數的命名第一個字元要小寫
         {
             //get Credentials from client_secret.json file 
             UserCredential credential;
@@ -47,17 +47,17 @@ namespace MIS_Server.Models
         //get all files from Google Drive.
         public static List<GoogleDriveFiles> getAllDriveFiles()
         {
-            DriveService driveService = getService();
+            DriveService driveService = getDriveService();
 
-            // define parameters of request.
-            FilesResource.ListRequest fileListRequest = driveService.Files.List();
+            // declare parameters of request.
+            FilesResource.ListRequest fileListRequestParameters = driveService.Files.List();
 
             //listRequest.PageSize = 10;
             //listRequest.PageToken = 10;
-            fileListRequest.Fields = "nextPageToken, files(id, name, size, version, createdTime)";
+            fileListRequestParameters.Fields = "nextPageToken, files(id, name, size, version, createdTime)";
 
-            //get file list.
-            IList<Google.Apis.Drive.v3.Data.File> files = fileListRequest.Execute().Files;
+            // get file list through interface.
+            IList<Google.Apis.Drive.v3.Data.File> files = fileListRequestParameters.Execute().Files;  // 來自 nuget 的 Google.Apis.Drive.v3.Data.File
             List<GoogleDriveFiles> fileList = new List<GoogleDriveFiles>();
 
             if (files != null && files.Count > 0)
@@ -83,22 +83,24 @@ namespace MIS_Server.Models
         {
             if (file != null && file.ContentLength > 0)
             {
-                DriveService driveService = getService();
-
+                
+                // step 1: 上傳檔案及所在的目錄
                 string pathForDownloadRepositories = Path.Combine(HttpContext.Current.Server.MapPath("~/GoogleDriveFiles"),
                 Path.GetFileName(file.FileName));
-                file.SaveAs(pathForDownloadRepositories);
+                file.SaveAs(pathForDownloadRepositories);   // 先做儲存再上傳
 
+                // step 2: 整理上傳的資料格式
                 var FileMetaData = new Google.Apis.Drive.v3.Data.File();
                 FileMetaData.Name = Path.GetFileName(file.FileName);
                 FileMetaData.MimeType = MimeMapping.GetMimeMapping(pathForDownloadRepositories);
 
+                // step 3: 呼叫上傳
                 FilesResource.CreateMediaUpload request;  // requeset 是原創作者的命名,真實的用途是「上傳的媒介」 
-
+                DriveService driveService = getDriveService();
                 using (var streamDevice = new System.IO.FileStream(pathForDownloadRepositories, System.IO.FileMode.Open))
                 {
                     request = driveService.Files.Create(FileMetaData, streamDevice, FileMetaData.MimeType);
-                    request.Fields = "id";
+                    request.Fields = "id";  // get file id, id = file.Id
                     request.Upload();
                 }
             }
@@ -107,12 +109,12 @@ namespace MIS_Server.Models
         //Download file from Google Drive by fileId.
         public static string DownloadGoogleFile(string fileId)
         {
-            DriveService driveService = getService();
+            DriveService driveService = getDriveService();
 
             string FolderPath = System.Web.HttpContext.Current.Server.MapPath("/GoogleDriveFiles/");
             FilesResource.GetRequest request = driveService.Files.Get(fileId);
 
-            string FileName = request.Execute().Name;
+            string FileName = request.Execute().Name;   // Name 是 Execute() 回傳的資料
             string credentialPath = System.IO.Path.Combine(FolderPath, FileName);
 
             MemoryStream stream1 = new MemoryStream();
@@ -158,7 +160,7 @@ namespace MIS_Server.Models
         //Delete file from the Google drive
         public static void DeleteFile(GoogleDriveFiles files)
         {
-            DriveService driveService = getService();
+            DriveService driveService = getDriveService();
             try
             {
                 // Initial validation.
