@@ -12,5 +12,6 @@ namespace MIS_Server.Models
         public long? Size { get; set; }
         public long? Version { get; set; }
         public DateTime? CreatedTime { get; set; }
+        public IList<string> Parents { get; set; }
     }
 }
