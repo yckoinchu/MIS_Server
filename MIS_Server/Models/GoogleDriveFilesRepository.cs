@@ -111,11 +111,11 @@ namespace MIS_Server.Models
         {
             DriveService driveService = getDriveService();
 
-            string FolderPath = System.Web.HttpContext.Current.Server.MapPath("/GoogleDriveFiles/");
+            string downloadFolderPath = System.Web.HttpContext.Current.Server.MapPath("/GoogleDriveFiles/");
             FilesResource.GetRequest request = driveService.Files.Get(fileId);
 
-            string FileName = request.Execute().Name;   // Name 是 Execute() 回傳的資料
-            string credentialPath = System.IO.Path.Combine(FolderPath, FileName);
+            string FileName = request.Execute().Name;   // Name 是 Execute() 回傳(物件裡)的資料(檔案名稱)
+            string downloadFilePath = System.IO.Path.Combine(downloadFolderPath, FileName);
 
             MemoryStream stream1 = new MemoryStream();
 
@@ -134,7 +134,7 @@ namespace MIS_Server.Models
                     case DownloadStatus.Completed:
                         {
                             Console.WriteLine("Download complete.");
-                            SaveStream(stream1, credentialPath);
+                            saveStream(stream1, downloadFilePath);
                             break;
                         }
                     case DownloadStatus.Failed:
@@ -145,20 +145,20 @@ namespace MIS_Server.Models
                 }
             };
             request.Download(stream1);
-            return credentialPath;
+            return downloadFilePath;
         }
 
         // file save to server path
-        private static void SaveStream(MemoryStream stream, string credentialPath)
+        private static void saveStream(MemoryStream stream, string saveFileName)
         {
-            using (System.IO.FileStream file = new FileStream(credentialPath, FileMode.Create, FileAccess.ReadWrite))
+            using (System.IO.FileStream file = new FileStream(saveFileName, FileMode.Create, FileAccess.ReadWrite))
             {
                 stream.WriteTo(file);
             }
         }
 
         //Delete file from the Google drive
-        public static void DeleteFile(GoogleDriveFiles files)
+        public static void DeleteFile(GoogleDriveFiles deleteFiles)
         {
             DriveService driveService = getDriveService();
             try
@@ -167,11 +167,11 @@ namespace MIS_Server.Models
                 if (driveService == null)
                     throw new ArgumentNullException("driveService");
 
-                if (files == null)
-                    throw new ArgumentNullException(files.Id);
+                if (deleteFiles == null)
+                    throw new ArgumentNullException(deleteFiles.Id);
 
                 // Make the request.
-                driveService.Files.Delete(files.Id).Execute();
+                driveService.Files.Delete(deleteFiles.Id).Execute();
             }
             catch (Exception ex)
             {
