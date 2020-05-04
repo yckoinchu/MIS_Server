@@ -10,10 +10,40 @@ namespace MIS_Server.Controllers
 {
     public class MisGoogleDriveController : Controller
     {
+        #region 建構式
+
+            public readonly GoogleDriveFilesRepository _Gr;
+
+            public MisGoogleDriveController()
+            {
+                _Gr = new GoogleDriveFilesRepository();
+            }
+
+        #endregion
+
         [HttpGet]
         public ActionResult GetGoogleDriveFiles()
         {
             return View(GoogleDriveFilesRepository.getAllDriveFiles());
+        }
+
+        public ActionResult GetContainsInFolder(string folderId)
+        {
+            return null;
+        }
+
+        [HttpPost]
+        public ActionResult CreateFolder(String FolderName)
+        {
+            GoogleDriveFilesRepository.CreateFolder(FolderName);
+            return RedirectToAction("GetGoogleDriveFiles");
+        }
+
+        [HttpPost]
+        public ActionResult FileUploadInFolder(GoogleDriveFiles FolderId, HttpPostedFileBase file)
+        {
+            GoogleDriveFilesRepository.FileUploadInFolder(FolderId.Id, file);
+            return RedirectToAction("GetGoogleDriveFiles");
         }
 
         [HttpPost]
