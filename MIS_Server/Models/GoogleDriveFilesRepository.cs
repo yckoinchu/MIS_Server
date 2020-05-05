@@ -114,7 +114,7 @@ namespace MIS_Server.Models
 
             //listRequest.PageSize = 10;
             //listRequest.PageToken = 10;
-            fileListRequestParameters.Fields = "nextPageToken, files(id, name, size, version, createdTime)";
+            fileListRequestParameters.Fields = "nextPageToken, files(createdTime, id, name, size, version, trashed, parents)";
 
             // get file list through interface.
             IList<Google.Apis.Drive.v3.Data.File> files = fileListRequestParameters.Execute().Files;  // 來自 nuget 的 Google.Apis.Drive.v3.Data.File
@@ -130,7 +130,8 @@ namespace MIS_Server.Models
                         Name = file.Name,
                         Size = file.Size,
                         Version = file.Version,
-                        CreatedTime = file.CreatedTime
+                        CreatedTime = file.CreatedTime,
+                        Parents = file.Parents
                     };
                     fileList.Add(File);
                 }
