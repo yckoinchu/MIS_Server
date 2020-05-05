@@ -29,7 +29,7 @@ namespace MIS_Server.Controllers
 
         public ActionResult GetContainsInFolder(string folderId)
         {
-            return null;
+            return View(GoogleDriveFilesRepository.GetContainsInFolder(folderId));
         }
 
         [HttpPost]
