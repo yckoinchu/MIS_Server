@@ -101,7 +101,7 @@
                         <td>
                             @if (@item.Size == null)
                             {
-                                <a href="@Url.Action("GetContainsInFolder", "MisGoogleDrive", new { folderId = item.Id })">@item.Name</a>
+                                <a href="@Url.Action("getFilesInFolder", "MisGoogleDrive", new { folderId = item.Id })">@item.Name</a>
                             }
                             else
                             { @item.Name}

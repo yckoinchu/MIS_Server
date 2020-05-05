@@ -21,7 +21,7 @@ namespace MIS_Server.Models
         public static string[] scopes = { Google.Apis.Drive.v3.DriveService.Scope.Drive }; // application 短期存取(scope) 使用者的資料
 
         //create Drive API service.
-        public static Google.Apis.Drive.v3.DriveService getDriveService_v3()     // 函數的命名第一個字元要小寫
+        public static Google.Apis.Drive.v3.DriveService getDriveService_v3()     // 函數的命名第一個字元要小寫, 用憑證取得 drive service
         {
             //get Credentials from client_secret.json file 
             UserCredential credential;
@@ -47,7 +47,7 @@ namespace MIS_Server.Models
             return driveService;
         }
 
-        public static Google.Apis.Drive.v2.DriveService getDriveService_v2()
+        public static Google.Apis.Drive.v2.DriveService getDriveService_v2()  // 用憑證取得 drive service
         {
             UserCredential credential;
             var secretPath = System.Web.Hosting.HostingEnvironment.MapPath("~/Content/");
@@ -73,14 +73,14 @@ namespace MIS_Server.Models
             return service;
         }
 
-        public static List<GoogleDriveFiles> GetContainsInFolder(String folderId)
+        public static List<GoogleDriveFiles> getFilesInFolder(String folderId)          // 取得目錄下的檔案
         {
             List<string> ChildList = new List<string>();
             Google.Apis.Drive.v2.DriveService ServiceV2 = getDriveService_v2();
             ChildrenResource.ListRequest ChildrenIDsRequest = ServiceV2.Children.List(folderId);
             do
             {
-                ChildList children = ChildrenIDsRequest.Execute();
+                ChildList children = ChildrenIDsRequest.Execute();  // 執行後的廻傳物件
 
                 if (children.Items != null && children.Items.Count > 0)
                 {
@@ -99,7 +99,7 @@ namespace MIS_Server.Models
 
             foreach (string Id in ChildList)
             {
-                Filter_FileList.Add(AllFileList.Where(x => x.Id == Id).FirstOrDefault());
+                Filter_FileList.Add(AllFileList.Where(x => x.Id == Id).FirstOrDefault()); 
             }
             return Filter_FileList;
         }
