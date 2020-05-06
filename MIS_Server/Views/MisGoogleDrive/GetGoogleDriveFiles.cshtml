@@ -100,7 +100,7 @@
                         }
                         <td>
                             @if (@item.Size == null)
-                            {
+                            {   // folderId 是 getFilesInFolder 的參數
                                 <a href="@Url.Action("getFilesInFolder", "MisGoogleDrive", new { folderId = item.Id })">@item.Name</a>
                             }
                             else
@@ -126,6 +126,7 @@
                         <td>
                             @if (FileSize == string.Empty)
                             {
+                                // enctype = "multipart/form-data" 是上傳二進位制的資料過，要取值須先做轉換
                                 using (Html.BeginForm("FileUploadInFolder", "MisGoogleDrive", FormMethod.Post, new { enctype = "multipart/form-data" }))
                                 {
                                     <input type="hidden" name=Id value="@item.Id">
