@@ -27,9 +27,9 @@ namespace MIS_Server.Controllers
             return View(GoogleDriveFilesRepository.getAllDriveFiles());
         }
 
-        public ActionResult GetContainsInFolder(string folderId)
+        public ActionResult getFilesInFolder(string folderId)
         {
-            return View(GoogleDriveFilesRepository.GetContainsInFolder(folderId));
+            return View(GoogleDriveFilesRepository.getFilesInFolder(folderId));
         }
 
         [HttpPost]
