@@ -10,16 +10,16 @@ namespace MIS_Server.Controllers
 {
     public class MisGoogleDriveController : Controller
     {
-        #region 建構式
+        //#region 建構式
 
-            public readonly GoogleDriveFilesRepository _Gr;
+        //    public readonly GoogleDriveFilesRepository _Gr;
 
-            public MisGoogleDriveController()
-            {
-                _Gr = new GoogleDriveFilesRepository();
-            }
+        //    public MisGoogleDriveController()
+        //    {
+        //        _Gr = new GoogleDriveFilesRepository();
+        //    }
 
-        #endregion
+        //#endregion
 
         [HttpGet]
         public ActionResult GetGoogleDriveFiles()
