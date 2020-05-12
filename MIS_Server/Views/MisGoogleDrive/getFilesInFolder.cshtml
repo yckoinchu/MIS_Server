@@ -1,5 +1,11 @@
 ﻿@model IEnumerable<MIS_Server.Models.GoogleDriveFiles>
 
+@{
+    ViewBag.Title = "Google Drive API v3 - ASP.NET MVC 5 [Everyday Be Coding]";
+}
+
+<h2 class="imagetable">Google Drive API v3 - [Root Directory]</h2>
+
 <style type="text/css">
     table.imagetable {
         font-family: verdana,arial,sans-serif;
@@ -26,41 +32,89 @@
             border-color: #999999;
         }
 </style>
+
 <center>
-    <br><br>
-    @if (Model.Count() > 0)
-    {
+    <div style="width:100%;">
         <table class="imagetable">
             <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Name)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Size)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Version)
-                </th>
-                <th>
-                    Created Time
-                </th>
+                <td>
+                    @using (Html.BeginForm("CreateFolder", "MisGoogleDrive", FormMethod.Post))
+                    {
+                        <p>
+                            Folder Name :<input type="text" name="FolderName" id="txtFolderName" style="align-content:center" />
+                            <input type="submit" class="CreateFolder" value="Create Folder" style="align-content:center" />
+                        </p>
+                    }
+                </td>
+                <td>
+                    @using (Html.BeginForm("UploadFile", "MisGoogleDrive", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        <label>File Upload in Root :</label>
+                        <input type="file" name="file" id="file" style="width:176px;" />
+                        <input type="submit" value="Upload" />
+                    }
+                </td>
             </tr>
+        </table>
+    </div>
 
-            @foreach (var item in Model)
+    <br />
+
+    <table class="imagetable">
+        <tr id="header">
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Size)
+            </th>
+            <th>
+                Type
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Version)
+            </th>
+            <th>
+                Created Time
+            </th>
+            <th>
+                Upload
+            </th>
+        </tr>
+
+        @if (Model.Count() > 0)
+        {
+            foreach (var item in Model)
             {
-                string FileSize = string.Empty;
-                string Type = string.Empty;
-                if (@item.Size != null)
-                {
-                    long? KiloByte = @item.Size;
-                    FileSize = KiloByte + " bytes";
-                }
+                // error: 並未將物件參考設定為物件的執行個體, ans: 對於非靜態物件，在使用前都需要用New陳述式執行個體化
+
                 <tr>
+                    @{
+                        string FileSize = string.Empty;
+                        string Type = string.Empty;
+                        if (@item.Size != null)
+                        {
+                            long? KiloByte = @item.Size;
+                            FileSize = KiloByte + " bytes";
+                        }
+                    }
                     <td>
-                        @Html.DisplayFor(modelItem => item.Name)
+                        @if (@item.Size == null)
+                        {   // folderId 是 getFilesInFolder 的參數
+                            <a href="@Url.Action("getFilesInFolder", "MisGoogleDrive", new { folderId = item.Id })">@item.Name</a>
+                        }
+                        else
+                        { @item.Name}
                     </td>
                     <td>
                         @FileSize
+                    </td>
+                    <td>
+                        @{
+                            if (FileSize == string.Empty) { Type = "Folder"; }
+                            else { Type = "File"; }
+                        }
+                        @Type
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.Version)
@@ -68,31 +122,25 @@
                     <td>
                         @string.Format("{0: MM/dd/yyyy}", Convert.ToDateTime(Html.DisplayFor(modelItem => item.CreatedTime).ToString()))
                     </td>
+
+                    <td>
+                        @if (FileSize == string.Empty)
+                        {
+                            // enctype = "multipart/form-data" 是上傳二進位制的資料；另外，二進制要取值前須先做轉換
+                            using (Html.BeginForm("FileUploadInFolder", "MisGoogleDrive", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                            {
+                                <input type="hidden" name=Id value="@item.Id">
+                                <input type="file" name="file" id="file" style="width:176px;" />
+                                <input type="submit" value="Upload" />
+                            }
+                        }
+                    </td>
                 </tr>
             }
-        </table>
-    }
-    else
-    {
-        <table class="imagetable">
-            <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Name)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Size)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Version)
-                </th>
-                <th>
-                    Created Time
-                </th>
-            </tr>
-            <tr><td colspan="4">No records found</td></tr>
-        </table>
-    }
-
-    @Html.ActionLink("Back", "GetGoogleDriveFiles")
+        }
+        else
+        {
+            <tr> <td colspan="6">No Records found</td> </tr>
+        }
+    </table>
 </center>
-

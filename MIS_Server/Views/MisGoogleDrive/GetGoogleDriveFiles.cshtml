@@ -86,13 +86,8 @@
         {
             foreach (var item in Model)
             {
-                if (item.Parents == null)
-                {
-                    continue;
-                }
                 // error: 並未將物件參考設定為物件的執行個體, ans: 對於非靜態物件，在使用前都需要用New陳述式執行個體化
-                if (item.Parents[0] == "0AN0RxaVnRLmVUk9PVA")
-                {
+
                     <tr>
                         @{
                             string FileSize = string.Empty;
@@ -141,7 +136,6 @@
                             }
                         </td>
                     </tr>
-                }
             }
         }
         else

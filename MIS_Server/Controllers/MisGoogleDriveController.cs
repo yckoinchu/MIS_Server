@@ -24,7 +24,21 @@ namespace MIS_Server.Controllers
         [HttpGet]
         public ActionResult GetGoogleDriveFiles()
         {
-            return View(GoogleDriveFilesRepository.getAllDriveFiles());
+            var result = GoogleDriveFilesRepository.getAllDriveFiles();
+            List<GoogleDriveFiles> googleDriveFiles = new List<GoogleDriveFiles>();
+            foreach(var item in result)
+            {
+                if(item.Parents == null)
+                {
+                    continue;
+                }
+                if(item.Parents[0] == "0AN0RxaVnRLmVUk9PVA" && item.Name == "DIM")
+                {
+                    googleDriveFiles.Add(item);
+                }
+
+            }
+            return View(googleDriveFiles);
         }
 
         public ActionResult getFilesInFolder(string folderId)
