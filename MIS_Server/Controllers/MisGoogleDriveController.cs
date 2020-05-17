@@ -32,7 +32,7 @@ namespace MIS_Server.Controllers    // users' applications
                 {
                     continue;
                 }
-                if(item.Parents[0] == "0AN0RxaVnRLmVUk9PVA" && item.Name == "DIM")
+                if(item.Parents[0] == "0AN0RxaVnRLmVUk9PVA" && item.Name == "DIM")  // root 設定在 DIM 目錄
                 {
                     googleDriveFiles.Add(item);
                 }

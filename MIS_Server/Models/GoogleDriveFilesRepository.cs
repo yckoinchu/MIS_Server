@@ -75,18 +75,18 @@ namespace MIS_Server.Models
 
         public static List<GoogleDriveFiles> getFilesInFolder(String folderId)          // 取得目錄下的檔案
         {
-            List<string> ChildList = new List<string>();
+            List<string> fileIdList = new List<string>();
             Google.Apis.Drive.v2.DriveService ServiceV2 = getDriveService_v2();
             ChildrenResource.ListRequest targetFolderRequest = ServiceV2.Children.List(folderId);  // 標的目錄(附帶回應)
             do
             {
                 ChildList children = targetFolderRequest.Execute();  // 執行後的回傳物件
 
-                if (children.Items != null && children.Items.Count > 0)
+                if (children.Items != null && children.Items.Count > 0) // children.Items 只有檔案的 id， 沒有名稱
                 {
                     foreach (var file in children.Items)
                     {
-                        ChildList.Add(file.Id);
+                        fileIdList.Add(file.Id);        // 檔案 id 
                     }
                 }
                 targetFolderRequest.PageToken = children.NextPageToken;
@@ -94,12 +94,12 @@ namespace MIS_Server.Models
             } while (!String.IsNullOrEmpty(targetFolderRequest.PageToken));
 
             //Get All File List
-            List<GoogleDriveFiles> AllFileList = getAllDriveFiles();
+            List<GoogleDriveFiles> AllFileList = getAllDriveFiles();        // 提取檔案名稱
             List<GoogleDriveFiles> Filter_FileList = new List<GoogleDriveFiles>();
 
-            foreach (string Id in ChildList)
+            foreach (string Id in fileIdList)
             {
-                Filter_FileList.Add(AllFileList.Where(x => x.Id == Id).FirstOrDefault()); 
+                Filter_FileList.Add(AllFileList.Where(x => x.Id == Id).FirstOrDefault()); // 比對
             }
             return Filter_FileList;
         }
@@ -124,7 +124,7 @@ namespace MIS_Server.Models
             {
                 foreach (var file in files)
                 {
-                    GoogleDriveFiles File = new GoogleDriveFiles
+                    GoogleDriveFiles fileMeta = new GoogleDriveFiles    // 檔案的基本資料
                     {
                         Id = file.Id,
                         Name = file.Name,
@@ -133,7 +133,7 @@ namespace MIS_Server.Models
                         CreatedTime = file.CreatedTime,
                         Parents = file.Parents
                     };
-                    fileList.Add(File);
+                    fileList.Add(fileMeta);
                 }
             }
             return fileList;
