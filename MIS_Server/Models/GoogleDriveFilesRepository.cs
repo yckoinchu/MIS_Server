@@ -97,7 +97,7 @@ namespace MIS_Server.Models
             List<GoogleDriveFiles> AllFileList = getAllDriveFiles();        // 提取檔案名稱
             List<GoogleDriveFiles> Filter_FileList = new List<GoogleDriveFiles>();
 
-            foreach (string Id in fileIdList)
+            foreach (string Id in fileIdList)   // v2 的辦法，很浪費資源
             {
                 Filter_FileList.Add(AllFileList.Where(x => x.Id == Id).FirstOrDefault()); // 比對
             }
@@ -114,7 +114,7 @@ namespace MIS_Server.Models
 
             //listRequest.PageSize = 10;
             //listRequest.PageToken = 10;
-            fileListRequestParameters.Fields = "nextPageToken, files(createdTime, id, name, size, version, trashed, parents)";
+            fileListRequestParameters.Fields = "nextPageToken, files(createdTime, id, name, size, version, trashed, parents)"; // 解決了 v2 浪費資源的問題
 
             // get file list through interface.
             IList<Google.Apis.Drive.v3.Data.File> files = fileListRequestParameters.Execute().Files;  // 來自 nuget 的 Google.Apis.Drive.v3.Data.File
@@ -181,7 +181,7 @@ namespace MIS_Server.Models
                     request.Fields = "id";
                     request.Upload();
                 }
-                var file1 = request.ResponseBody;
+                var file1 = request.ResponseBody;  // @RequestBody 存取HTTP request body 的資訊，同時輸出HTTP body 資訊
             }
         }
 
