@@ -25,7 +25,7 @@ namespace MIS_Server.Models
         {
             //get Credentials from client_secret.json file 
             UserCredential credential;
-            var secretPath = System.Web.Hosting.HostingEnvironment.MapPath("~/Content/");   // path of id and key 
+            var secretPath = System.Web.Hosting.HostingEnvironment.MapPath("~/Content/");   // 憑證的目錄 
             using (var streamDevice = new FileStream(Path.Combine(secretPath, "client_secret.json"), FileMode.Open, FileAccess.Read)) // 讀取檔案的串流設備
             {
                 String credentialPath = Path.Combine(secretPath, "DriveServiceCredentials.json"); // 憑證的路徑
@@ -38,7 +38,7 @@ namespace MIS_Server.Models
                     new FileDataStore(credentialPath, true)).Result;
             }
 
-            //create Drive API service.
+            //create Drive service for API
             Google.Apis.Drive.v3.DriveService driveService = new Google.Apis.Drive.v3.DriveService(new BaseClientService.Initializer()  // 提供雲端硬碟服務的物件(做設定)
             {
                 HttpClientInitializer = credential,
@@ -77,10 +77,10 @@ namespace MIS_Server.Models
         {
             List<string> ChildList = new List<string>();
             Google.Apis.Drive.v2.DriveService ServiceV2 = getDriveService_v2();
-            ChildrenResource.ListRequest ChildrenIDsRequest = ServiceV2.Children.List(folderId);
+            ChildrenResource.ListRequest targetFolderRequest = ServiceV2.Children.List(folderId);  // 標的目錄(附帶回應)
             do
             {
-                ChildList children = ChildrenIDsRequest.Execute();  // 執行後的廻傳物件
+                ChildList children = targetFolderRequest.Execute();  // 執行後的回傳物件
 
                 if (children.Items != null && children.Items.Count > 0)
                 {
@@ -89,9 +89,9 @@ namespace MIS_Server.Models
                         ChildList.Add(file.Id);
                     }
                 }
-                ChildrenIDsRequest.PageToken = children.NextPageToken;
+                targetFolderRequest.PageToken = children.NextPageToken;
 
-            } while (!String.IsNullOrEmpty(ChildrenIDsRequest.PageToken));
+            } while (!String.IsNullOrEmpty(targetFolderRequest.PageToken));
 
             //Get All File List
             List<GoogleDriveFiles> AllFileList = getAllDriveFiles();

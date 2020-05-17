@@ -6,7 +6,7 @@ using System.Web;
 using System.Web.Mvc;
 using MIS_Server.Models;
 
-namespace MIS_Server.Controllers
+namespace MIS_Server.Controllers    // users' applications
 {
     public class MisGoogleDriveController : Controller
     {
@@ -22,7 +22,7 @@ namespace MIS_Server.Controllers
         //#endregion
 
         [HttpGet]
-        public ActionResult GetGoogleDriveFiles()
+        public ActionResult GetGoogleDriveFiles()   // set DIM as the root directory for MIS department
         {
             var result = GoogleDriveFilesRepository.getAllDriveFiles();
             List<GoogleDriveFiles> googleDriveFiles = new List<GoogleDriveFiles>();
@@ -76,12 +76,12 @@ namespace MIS_Server.Controllers
 
         public void DownloadFile(string id)
         {
-            string FilePath = GoogleDriveFilesRepository.DownloadGoogleFile(id);
+            string file = GoogleDriveFilesRepository.DownloadGoogleFile(id);
 
 
-            Response.ContentType = "application/zip";
-            Response.AddHeader("Content-Disposition", "attachment; filename=" + Path.GetFileName(FilePath));
-            Response.WriteFile(System.Web.HttpContext.Current.Server.MapPath("~/GoogleDriveFiles/" + Path.GetFileName(FilePath)));
+            Response.ContentType = "application/zip";   // using System.Web; 壓縮檔
+            Response.AddHeader("Content-Disposition", "attachment; filename=" + Path.GetFileName(file));  // 傳回 'file' 所在路徑的檔案名稱和副檔名
+            Response.WriteFile(System.Web.HttpContext.Current.Server.MapPath("~/GoogleDriveFiles/" + Path.GetFileName(file)));  // 將file直接寫入HTTP 回應的輸出資料流
             Response.End();
             Response.Flush();
         }
