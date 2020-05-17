@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using MIS_Server.Models;
+using MIS_Server.Models;    // 指專案底下所有建置的 models
 
 namespace MIS_Server.Controllers    // users' applications
 {
@@ -57,21 +57,21 @@ namespace MIS_Server.Controllers    // users' applications
         public ActionResult FileUploadInFolder(GoogleDriveFiles FolderId, HttpPostedFileBase file)
         {
             GoogleDriveFilesRepository.FileUploadInFolder(FolderId.Id, file);
-            return RedirectToAction("GetGoogleDriveFiles");
+            return RedirectToAction("GetGoogleDriveFiles");     // 建目錄後，應該以更新資訊的方式呈現。目前還沒做到
         }
 
         [HttpPost]
         public ActionResult DeleteFile(GoogleDriveFiles file)
         {
             GoogleDriveFilesRepository.DeleteFile(file);
-            return RedirectToAction("GetGoogleDriveFiles");
+            return RedirectToAction("GetGoogleDriveFiles");  
         }
 
         [HttpPost]
         public ActionResult UploadFile(HttpPostedFileBase file)
         {
             GoogleDriveFilesRepository.FileUpload(file);
-            return RedirectToAction("GetGoogleDriveFiles"); // GetGoogleDriveFiles
+            return RedirectToAction("GetGoogleDriveFiles"); // 上傳後，應該以更新資訊的方式呈現。目前還沒做到
         }
 
         public void DownloadFile(string id)
